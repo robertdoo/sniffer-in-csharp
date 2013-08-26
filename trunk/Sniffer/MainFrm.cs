@@ -39,10 +39,10 @@ namespace Sniffer
                 {
                     AppendLog(Encoding.UTF8.GetString(args.MessageBuffer, 20, (int)args.MessageLength - 20));
                 }
-                if (args.Protocol.Equals("UDP") && args.MessageLength > 8)
-                {
-                    AppendLog(Encoding.UTF8.GetString(args.MessageBuffer, 8, (int)args.MessageLength - 8));
-                }
+                //if (args.Protocol.Equals("UDP") && args.MessageLength > 8)
+                //{
+                //    AppendLog(Encoding.UTF8.GetString(args.MessageBuffer, 8, (int)args.MessageLength - 8));
+                //}
                 return;
             }
             if (_filters.Any(filter => filter.ShouldBeFiltered(args)))

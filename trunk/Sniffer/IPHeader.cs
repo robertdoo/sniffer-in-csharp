@@ -59,4 +59,88 @@ namespace Sniffer
         [FieldOffset(16)]
         public uint IpDestAddr;   
     }
+    /// <summary>
+    /// Tcp头结构
+    /// </summary>
+    [StructLayout(LayoutKind.Explicit)]
+    public struct TcpHeader
+    {
+        [FieldOffset(0)]
+        public IpHeader IpHeader;
+        /// <summary>
+        /// 16位源端口号
+        /// </summary>
+        [FieldOffset(20)]
+        public ushort OriginationPort;
+        /// <summary>
+        /// 16位目的端口号
+        /// </summary>
+        [FieldOffset(22)]
+        public ushort DestinationPort;
+        /// <summary>
+        /// 32位序列号
+        /// </summary>
+        [FieldOffset(24)]
+        public uint SerialNumber;
+        /// <summary>
+        /// 32位确认号
+        /// </summary>
+        [FieldOffset(28)]
+        public uint ConfirmNumber;
+        /// <summary>
+        /// 首部长度，仅前四位
+        /// </summary>
+        [FieldOffset(32)]
+        public byte HeaderLength;
+        /// <summary>
+        /// URG,ACK,PSH,PST,SYN,FIN,后六位
+        /// </summary>
+        [FieldOffset(33)]
+        public byte TcpFlags;
+        /// <summary>
+        /// 16位窗口大小
+        /// </summary>
+        [FieldOffset(34)]
+        public ushort WindowSize;
+        /// <summary>
+        /// 16位TCP检验和
+        /// </summary>
+        [FieldOffset(36)]
+        public ushort TcpChecksum;
+        /// <summary>
+        /// 16位紧急指针
+        /// </summary>
+        [FieldOffset(38)]
+        public ushort Ptr;
+    }
+    /// <summary>
+    /// Udp头结构
+    /// </summary>
+    [StructLayout(LayoutKind.Explicit)]
+    public struct UdpHeader
+    {
+        [FieldOffset(0)]
+        public IpHeader IpHeader;
+        /// <summary>
+        /// 16位源端口号
+        /// </summary>
+        [FieldOffset(20)]
+        public ushort OriginationPort;
+        /// <summary>
+        /// 16位目的端口号
+        /// </summary>
+        [FieldOffset(22)]
+        public ushort DestinationPort;
+        /// <summary>
+        /// 16位UDP长度
+        /// </summary>
+        [FieldOffset(24)]
+        public ushort UdpMessageLength;
+        /// <summary>
+        /// 16位TCP检验和
+        /// </summary>
+        [FieldOffset(26)]
+        public ushort UdpChecksum;
+
+    }
 }
