@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
 
@@ -79,61 +78,26 @@ namespace Sniffer
             }
             return retValue;
         }
-        //解析接收的数据包，形成PacketArrivedEventArgs事件数据类对象，并引发PacketArrival事件
-        unsafe private void Receive(byte[] buf, int len)
+        /// <summary>
+        /// 解析接收的数据包，形成PacketArrivedEventArgs事件数据类对象，并引发PacketArrival事件
+        /// </summary>
+        /// <param name="buf"></param>
+        /// <param name="len"></param>
+        private void Receive(byte[] buf, int len)
         {
-            var e = new PacketArrivedEventArgs();//新网络数据包信息事件
-
-            fixed (byte* fixedBuf = buf)
+            var e = PacketArrivedEventArgs.ParseFrom(buf,len);//新网络数据包信息事件
+            switch (e.Protocol.ToUpper())
             {
-                var head = (IpHeader*)fixedBuf;//把数据流整和为IPHeader结构
-                e.HeaderLength = (uint)(head->IpVerLen & 0x0F) << 2;
-
-                var tempProtocol = head->IpProtocol;
-                switch (tempProtocol) //提取协议类型
-                {
-                    case 1:
-                        e.Protocol = "ICMP";
-                        break;
-                    case 2:
-                        e.Protocol = "IGMP";
-                        break;
-                    case 6:
-                        e.Protocol = "TCP";
-                        break;
-                    case 17:
-                        e.Protocol = "UDP";
-                        break;
-                    default:
-                        e.Protocol = "UNKNOWN";
-                        break;
-                }
-
-                var tempVersion = (uint)(head->IpVerLen & 0xF0) >> 4;
-                e.IpVersion = tempVersion.ToString(CultureInfo.InvariantCulture);
-
-                //以下语句提取出了PacketArrivedEventArgs对象中的其他参数
-                var tempIpSrcaddr = head->IpSrcAddr;
-                var tempIpDestaddr = head->IpDestAddr;
-                var tempIp = new IPAddress(tempIpSrcaddr);
-                e.OriginationAddress = tempIp.ToString();
-                tempIp = new IPAddress(tempIpDestaddr);
-                e.DestinationAddress = tempIp.ToString();
-
-                var tempSrcport = *(short*)&fixedBuf[e.HeaderLength];
-                var tempDstport = *(short*)&fixedBuf[e.HeaderLength + 2];
-                e.OriginationPort = IPAddress.NetworkToHostOrder(tempSrcport).ToString(CultureInfo.InvariantCulture);
-                e.DestinationPort = IPAddress.NetworkToHostOrder(tempDstport).ToString(CultureInfo.InvariantCulture);
-
-                e.PacketLength = (uint)len;
-                e.MessageLength = (uint)len - e.HeaderLength;
-
-                e.ReceiveBuffer = buf;
-                //把buf中的IP头赋给PacketArrivedEventArgs中的IPHeaderBuffer
-                Array.Copy(buf, 0, e.IpHeaderBuffer, 0, (int)e.HeaderLength);
-                //把buf中的包中内容赋给PacketArrivedEventArgs中的MessageBuffer
-                Array.Copy(buf, (int)e.HeaderLength, e.MessageBuffer, 0, (int)e.MessageLength);
+                case "TCP":
+                    var te = TcpPacketArrivedEventArgs.ParseTcpFrom(buf, len);
+                    OnPacketArrival(te);
+                    return;
+                case "UDP":
+                    var ue = UdpPacketArrivedEventArgs.ParseUdpFrom(buf, len);
+                    OnPacketArrival(ue);
+                    return;
             }
+
             //引发PacketArrival事件
             OnPacketArrival(e);
         }
